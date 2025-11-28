@@ -48,13 +48,13 @@
 
 /**********ETH**********/
 &gmac {
-	status = "disabled";
+	status = "okay";
 };
 
 /**********USB**********/
 &usbdrd_dwc3 {
 	status = "okay";
-	dr_mode = "peripheral";
+	dr_mode = "host";
 };
 
 /**********SPI**********/
@@ -76,12 +76,12 @@
 /**********UART**********/
 /* UART3_M1 */
 &uart3 {
-	status = "disabled";
+	status = "okay";
 };
 
 /* UART4_M1 */
 &uart4 {
-	status = "disabled";
+	status = "okay";
 };
 
 /**********PWM**********/

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 COMMON_DIR=$(cd "$(dirname "$(realpath "$0")")/.."; pwd)
 SDK_DIR=$(realpath $COMMON_DIR)

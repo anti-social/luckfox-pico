@@ -64,7 +64,7 @@ post_chk() {
 		cd $default_ko_dir && sh insmod_ko.sh && cd -
 	fi
 
-	network_init &
+	# network_init &
 	check_linker /userdata /oem/usr/www/userdata
 	check_linker /media/usb0 /oem/usr/www/usb0
 	check_linker /mnt/sdcard /oem/usr/www/sdcard

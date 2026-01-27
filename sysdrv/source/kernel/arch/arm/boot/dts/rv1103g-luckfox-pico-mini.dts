@@ -89,3 +89,8 @@
 &pwm1 {
 	status = "disabled";
 };
+
+/*******Watchdog*******/
+&wdt {
+	status = "okay";
+};

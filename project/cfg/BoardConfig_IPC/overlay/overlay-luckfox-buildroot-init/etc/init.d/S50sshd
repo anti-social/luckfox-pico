@@ -6,6 +6,11 @@
 # Make sure the ssh-keygen progam exists
 [ -f /usr/bin/ssh-keygen ] || exit 0
 
+# TODO: Find out how to fix permissions when building image
+[ -f /etc/ssh/ssh_host_ecdsa_key ] && chmod 0600 /etc/ssh/ssh_host_ecdsa_key
+[ -f /etc/ssh/ssh_host_ed25519_key ] && chmod 0600 /etc/ssh/ssh_host_ed25519_key
+[ -f /etc/ssh/ssh_host_rsa_key ] && chmod 0600 /etc/ssh/ssh_host_rsa_key
+
 umask 077
 
 start() {

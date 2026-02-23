@@ -72,7 +72,9 @@ post_chk() {
 	rkipc_ini=/userdata/rkipc.ini
 	default_rkipc_ini=/tmp/rkipc-factory-config.ini
 
-	if [ ! -f "/oem/usr/share/rkipc.ini" ]; then
+	if [ -f "/usr/share/rkipc.ini" ]; then
+		ln -s -f /usr/share/rkipc.ini $default_rkipc_ini
+	else
 		lsmod | grep sc530ai
 		if [ $? -eq 0 ]; then
 			ln -s -f /oem/usr/share/rkipc-500w.ini $default_rkipc_ini

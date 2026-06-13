@@ -1460,25 +1460,25 @@ function __PACKAGE_OEM() {
 		)
 	fi
 
-	mkdir -p $(dirname $RK_PROJECT_FILE_OEM_SCRIPT)
-	cat >$RK_PROJECT_FILE_OEM_SCRIPT <<EOF
-#!/bin/sh
-[ -f /etc/profile.d/RkEnv.sh ] && source /etc/profile.d/RkEnv.sh
-case \$1 in
-	start)
-		sh /oem/usr/bin/RkLunch.sh
-		;;
-	stop)
-		sh /oem/usr/bin/RkLunch-stop.sh
-		;;
-	*)
-		exit 1
-		;;
-esac
-EOF
+# 	mkdir -p $(dirname $RK_PROJECT_FILE_OEM_SCRIPT)
+# 	cat >$RK_PROJECT_FILE_OEM_SCRIPT <<EOF
+# #!/bin/sh
+# [ -f /etc/profile.d/RkEnv.sh ] && source /etc/profile.d/RkEnv.sh
+# case \$1 in
+# 	start)
+# 		sh /oem/usr/bin/RkLunch.sh
+# 		;;
+# 	stop)
+# 		sh /oem/usr/bin/RkLunch-stop.sh
+# 		;;
+# 	*)
+# 		exit 1
+# 		;;
+# esac
+# EOF
 
-	chmod a+x $RK_PROJECT_FILE_OEM_SCRIPT
-	cp -f $RK_PROJECT_FILE_OEM_SCRIPT $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d
+# 	chmod a+x $RK_PROJECT_FILE_OEM_SCRIPT
+# 	cp -f $RK_PROJECT_FILE_OEM_SCRIPT $RK_PROJECT_PACKAGE_ROOTFS_DIR/etc/init.d
 }
 
 function __PACKAGE_USERDATA() {

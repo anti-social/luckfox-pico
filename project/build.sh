@@ -1250,7 +1250,7 @@ function build_all() {
 
 	build_sysdrv
 	build_media
-	build_app
+	# build_app
 	build_firmware
 
 	finish_build

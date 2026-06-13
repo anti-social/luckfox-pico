@@ -1,0 +1,2 @@
+RUST_LOG="info"
+DAEMON_ARGS="$(fw_printenv -n firefly_args)"

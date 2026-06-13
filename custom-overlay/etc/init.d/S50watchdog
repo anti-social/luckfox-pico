@@ -1,0 +1,19 @@
+#!/bin/sh
+
+DAEMON=/sbin/watchdog
+PIDFILE=/var/run/watchdog.pid
+
+case "$1" in
+  start)
+    echo "Starting watchdog"
+    start-stop-daemon -S -x $DAEMON -p $PIDFILE
+    ;;
+  stop)
+    echo "Stopping watchdog"
+    start-stop-daemon -K -p $PIDFILE
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+esac

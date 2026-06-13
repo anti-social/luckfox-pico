@@ -1,0 +1,24 @@
+#!/bin/sh
+
+start() {
+    echo "Loading nftables"
+    [ -r /etc/nftables.conf ] && nft -f /etc/nftables.conf
+}
+
+stop() {
+    echo "Unloading nftables"
+    nft flush ruleset
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+	start|stop|restart)
+		"$1";;
+	*)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+start() {
+    echo "Setting up ina238 module"
+    modprobe ina238
+    echo "ina238 0x45" > /sys/bus/i2c/devices/i2c-3/new_device
+}
+
+stop() {
+    :
+}
+
+case "$1" in
+    start|stop)
+        "$1";;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+esac

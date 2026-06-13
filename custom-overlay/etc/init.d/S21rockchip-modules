@@ -1,0 +1,18 @@
+#!/bin/sh
+
+start() {
+    printf 'Loading rockchip kernel modules'
+    cd /oem/usr/ko && sh insmod_ko.sh && cd -    
+}
+
+stop() {
+    printf 'Nothing to stop'
+}
+
+case "$1" in
+    start|stop|restart)
+        "$1";;
+    *)
+        echo "Usage: $0 {start|stop}"
+        exit 1
+esac

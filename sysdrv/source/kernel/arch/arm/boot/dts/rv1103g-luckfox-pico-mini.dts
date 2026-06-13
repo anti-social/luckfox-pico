@@ -85,9 +85,32 @@
 };
 
 /**********PWM**********/
-/* PWM1_M0 */
-&pwm1 {
-	status = "disabled";
+/* PWM2_M2 */
+&pwm2 {
+	status = "okay";
+    pinctrl-names = "active";
+    pinctrl-0 = <&pwm2m2_pins>;
+};
+
+/* PWM4_M2 */
+&pwm4 {
+	status = "okay";
+    pinctrl-names = "active";
+    pinctrl-0 = <&pwm4m2_pins>;
+};
+
+/* PWM5_M2 */
+&pwm5 {
+	status = "okay";
+    pinctrl-names = "active";
+    pinctrl-0 = <&pwm5m2_pins>;
+};
+
+/* PWM6_M2 */
+&pwm6 {
+	status = "okay";
+    pinctrl-names = "active";
+    pinctrl-0 = <&pwm6m2_pins>;
 };
 
 /*******Watchdog*******/

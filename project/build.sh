@@ -774,6 +774,12 @@ function build_env() {
 
 	echo "$SYS_BOOTARGS" >>$ENV_CFG_FILE
 	echo "sd_parts=mmcblk0:16K@512(env),512K@32K(idblock),4M(uboot)" >>$ENV_CFG_FILE
+
+    # Configuration via uboot env image
+    if [ -n "$UBOOT_ENV_FILE" ]; then
+        cat $UBOOT_ENV_FILE >>$ENV_CFG_FILE
+    fi
+
 	# build env.img
 	$RK_PROJECT_PATH_PC_TOOLS/mkenvimage -s $ENV_SIZE -p 0x0 -o $env_cfg_img $ENV_CFG_FILE
 	chmod +r $env_cfg_img

@@ -438,6 +438,40 @@ static const struct cif_input_fmt in_fmts[] = {
 		.fmt_type	= CIF_FMT_TYPE_YUV,
 		.field		= V4L2_FIELD_INTERLACED,
 	}, {
+		/*
+		 * V4L2_FIELD_ALTERNATE variants: analog decoders such as
+		 * adv7180 default to alternate fields (top/bottom delivered as
+		 * separate frames). Hardware setup matches INTERLACED; field
+		 * reassembly is left to userspace.
+		 */
+		.mbus_code	= MEDIA_BUS_FMT_YUYV8_2X8,
+		.dvp_fmt_val	= YUV_INPUT_422 | YUV_INPUT_ORDER_YUYV,
+		.csi_fmt_val	= CSI_WRDDR_TYPE_YUV422,
+		.csi_yuv_order	= CSI_YUV_INPUT_ORDER_YUYV,
+		.fmt_type	= CIF_FMT_TYPE_YUV,
+		.field		= V4L2_FIELD_ALTERNATE,
+	}, {
+		.mbus_code	= MEDIA_BUS_FMT_YVYU8_2X8,
+		.dvp_fmt_val	= YUV_INPUT_422 | YUV_INPUT_ORDER_YVYU,
+		.csi_fmt_val	= CSI_WRDDR_TYPE_YUV422,
+		.csi_yuv_order	= CSI_YUV_INPUT_ORDER_YVYU,
+		.fmt_type	= CIF_FMT_TYPE_YUV,
+		.field		= V4L2_FIELD_ALTERNATE,
+	}, {
+		.mbus_code	= MEDIA_BUS_FMT_UYVY8_2X8,
+		.dvp_fmt_val	= YUV_INPUT_422 | YUV_INPUT_ORDER_UYVY,
+		.csi_fmt_val	= CSI_WRDDR_TYPE_YUV422,
+		.csi_yuv_order	= CSI_YUV_INPUT_ORDER_UYVY,
+		.fmt_type	= CIF_FMT_TYPE_YUV,
+		.field		= V4L2_FIELD_ALTERNATE,
+	}, {
+		.mbus_code	= MEDIA_BUS_FMT_VYUY8_2X8,
+		.dvp_fmt_val	= YUV_INPUT_422 | YUV_INPUT_ORDER_VYUY,
+		.csi_fmt_val	= CSI_WRDDR_TYPE_YUV422,
+		.csi_yuv_order	= CSI_YUV_INPUT_ORDER_VYUY,
+		.fmt_type	= CIF_FMT_TYPE_YUV,
+		.field		= V4L2_FIELD_ALTERNATE,
+	}, {
 		.mbus_code	= MEDIA_BUS_FMT_SBGGR8_1X8,
 		.dvp_fmt_val	= INPUT_MODE_RAW | RAW_DATA_WIDTH_8,
 		.csi_fmt_val	= CSI_WRDDR_TYPE_RAW8,
@@ -759,7 +793,13 @@ static void get_remote_terminal_sensor(struct rkcif_stream *stream,
 
 	media_graph_walk_start(&graph, entity);
 	while ((entity = media_graph_walk_next(&graph))) {
-		if (entity->function == MEDIA_ENT_F_CAM_SENSOR)
+		/*
+		 * Analog video decoders (e.g. adv7180) register as
+		 * MEDIA_ENT_F_ATV_DECODER rather than MEDIA_ENT_F_CAM_SENSOR,
+		 * so accept both when looking for the terminal source.
+		 */
+		if (entity->function == MEDIA_ENT_F_CAM_SENSOR ||
+		    entity->function == MEDIA_ENT_F_ATV_DECODER)
 			break;
 	}
 	mutex_unlock(&mdev->graph_mutex);
@@ -4988,6 +5028,22 @@ static int rkcif_create_dummy_buf(struct rkcif_stream *stream)
 		}
 	}
 
+	/*
+	 * Fallback: some decoders (e.g. adv7182) implement neither
+	 * enum_frame_interval nor are reachable via the terminal-sensor path
+	 * here, leaving max_size == 0 which makes rkcif_alloc_buffer return
+	 * -EINVAL. Size the dummy buffer from the stream's already-negotiated
+	 * output format instead.
+	 */
+	if (max_size == 0) {
+		max_size = stream->pixm.plane_fmt[0].sizeimage;
+		if (max_size == 0)
+			max_size = stream->pixm.width * stream->pixm.height * 2;
+		v4l2_dbg(1, rkcif_debug, &dev->v4l2_dev,
+			 "%s: sensor size unavailable, using pixm size %u\n",
+			 __func__, max_size);
+	}
+
 	dummy_buf->size = max_size;
 
 	dummy_buf->is_need_vaddr = true;
@@ -6670,6 +6726,12 @@ int rkcif_set_fmt(struct rkcif_stream *stream,
 		return -EINVAL;
 	}
 
+	if (!stream->cif_fmt_in) {
+		v4l2_err(&stream->cifdev->v4l2_dev,
+			 "input fmt of terminal sensor not supported\n");
+		return -EINVAL;
+	}
+
 	ret = rkcif_output_fmt_check(stream, fmt);
 	if (ret)
 		return -EINVAL;
@@ -7134,6 +7196,12 @@ static int rkcif_enum_fmt_vid_cap_mplane(struct file *file, void *priv,
 	} else {
 		v4l2_err(&stream->cifdev->v4l2_dev,
 			 "terminal subdev does not exist\n");
+		return -EINVAL;
+	}
+
+	if (!stream->cif_fmt_in) {
+		v4l2_err(&stream->cifdev->v4l2_dev,
+			 "input fmt of terminal sensor not supported\n");
 		return -EINVAL;
 	}
 

@@ -107,8 +107,26 @@
 /**********I2C**********/
 /* I2C3_M1 */
 &i2c3 {
-	status = "disabled";
+	status = "okay";
 	clock-frequency = <100000>;
+
+    adv7180: adv7180@21 {
+        /* IDENT (reg 0x11) reads 0x1c => ADV7182, not the base ADV7180.
+         * The adv7182 config does the analog front-end setup needed to lock. */
+        // compatible = "adi,adv7182";
+        compatible = "adi,adv7180";
+        reg = <0x21>;
+        status = "okay";
+        /* default-input = <N>; uncomment/set if the source is not on AIN1 */
+
+        port {
+            adv7180_out: endpoint {
+                bus-type = <6>;		/* BT.656 */
+                bus-width = <8>;
+                remote-endpoint = <&cif_bt656_in>;
+            };
+        };
+    };
 };
 
 /* I2C1_M1 */
@@ -121,15 +139,72 @@
 /**********UART**********/
 /* UART3_M1 */
 &uart3 {
-	status = "okay";
+	status = "disabled";
 };
 
 /* UART4_M1 */
 &uart4 {
-	status = "okay";
+	status = "disabled";
 };
 
 /**********RTC**********/
 &rtc {
 	status = "okay";
+};
+
+/*********MIPI**********/
+/* MIPI_LVDS - disabled, using DVP/BT.656 mode instead */
+&rkcif_mipi_lvds {
+	status = "disabled";
+};
+
+/*
+ * Trimmed M1 pin group: 8-bit BT.656 needs only clkin + d0..d7.
+ * The stock vicapm1_pins also muxes d8/d9/hsync/vsync; vsync (gpio1 PD2) is
+ * already owned by ff460000.i2c, which aborts the DVP probe with -22.
+ */
+&pinctrl {
+	vicap {
+		vicap_bt656_8bit_m1: vicap-bt656-8bit-m1 {
+			rockchip,pins =
+				/* vicap_clkin_m1 */
+				<1 RK_PD0 2 &pcfg_pull_none>,
+
+                /* vicap_d0_m1 */
+				<1 RK_PC0 2 &pcfg_pull_none>,
+				/* vicap_d1_m1 */
+				<1 RK_PC1 2 &pcfg_pull_none>,
+				/* vicap_d2_m1 */
+				<1 RK_PC2 2 &pcfg_pull_none>,
+				/* vicap_d3_m1 */
+				<1 RK_PC3 2 &pcfg_pull_none>,
+				/* vicap_d4_m1 */
+				<1 RK_PC4 2 &pcfg_pull_none>,
+				/* vicap_d5_m1 */
+				<1 RK_PC5 2 &pcfg_pull_none>,
+				/* vicap_d6_m1 */
+				<1 RK_PC6 2 &pcfg_pull_none>,
+				/* vicap_d7_m1 */
+				<1 RK_PC7 2 &pcfg_pull_none>;
+		};
+	};
+};
+
+/* RKCIF DVP/BT.656 input */
+&rkcif_dvp {
+	status = "okay";
+	pinctrl-names = "default";
+	/* Board breaks out the VI_BT656_*_M1 pins (gpio1 bank), not M0. */
+	// pinctrl-0 = <&vicapm0_pins>;
+	pinctrl-0 = <&vicap_bt656_8bit_m1>;
+
+	port {
+		cif_bt656_in: endpoint {
+			bus-type = <6>;		/* BT.656 */
+			bus-width = <8>;
+			data-lanes = <1>;
+
+			remote-endpoint = <&adv7180_out>;
+		};
+	};
 };

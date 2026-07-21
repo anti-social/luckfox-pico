@@ -1158,7 +1158,8 @@
 			rockchip,pins =
 				/* vicap_clkin_m1 */
 				<1 RK_PD0 2 &pcfg_pull_none>,
-				/* vicap_d0_m1 */
+
+                /* vicap_d0_m1 */
 				<1 RK_PA2 3 &pcfg_pull_none>,
 				/* vicap_d1_m1 */
 				<1 RK_PB1 4 &pcfg_pull_none>,
@@ -1174,11 +1175,13 @@
 				<1 RK_PC4 2 &pcfg_pull_none>,
 				/* vicap_d7_m1 */
 				<1 RK_PC5 2 &pcfg_pull_none>,
-				/* vicap_d8_m1 */
+
+                /* vicap_d8_m1 */
 				<1 RK_PC6 2 &pcfg_pull_none>,
 				/* vicap_d9_m1 */
 				<1 RK_PC7 2 &pcfg_pull_none>,
-				/* vicap_hsync_m1 */
+
+                /* vicap_hsync_m1 */
 				<1 RK_PD1 2 &pcfg_pull_none>,
 				/* vicap_vsync_m1 */
 				<1 RK_PD2 2 &pcfg_pull_none>;

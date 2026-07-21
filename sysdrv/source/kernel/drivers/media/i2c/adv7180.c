@@ -13,6 +13,7 @@
 #include <linux/i2c.h>
 #include <linux/slab.h>
 #include <linux/of.h>
+#include <linux/property.h>
 #include <linux/gpio/consumer.h>
 #include <linux/videodev2.h>
 #include <media/v4l2-ioctl.h>
@@ -1316,6 +1317,7 @@ static int adv7180_probe(struct i2c_client *client,
 {
 	struct adv7180_state *state;
 	struct v4l2_subdev *sd;
+	u32 val;
 	int ret;
 
 	/* Check if the adapter supports the needed features */
@@ -1327,7 +1329,13 @@ static int adv7180_probe(struct i2c_client *client,
 		return -ENOMEM;
 
 	state->client = client;
-	state->field = V4L2_FIELD_ALTERNATE;
+	/*
+	 * Default to interlaced so the RKCIF host weaves both fields into a
+	 * full-height frame (720x576 PAL / 720x480 NTSC). The stock ALTERNATE
+	 * default makes get_fmt report half height and the CIF captures a
+	 * single field, which shows up as only part of the picture.
+	 */
+	state->field = V4L2_FIELD_INTERLACED;
 	state->chip_info = (struct adv7180_chip_info *)id->driver_data;
 
 	state->pwdn_gpio = devm_gpiod_get_optional(&client->dev, "powerdown",
@@ -1362,6 +1370,19 @@ static int adv7180_probe(struct i2c_client *client,
 	else
 		state->powered = false;
 	state->input = 0;
+	/*
+	 * Allow the board DT to select which analog input (AINx) the
+	 * composite/S-video/component source is wired to. Without this the
+	 * decoder always uses input 0 (CVBS on AIN1) and never locks if the
+	 * signal is on a different pin. The CIF host does not expose S_INPUT
+	 * to userspace, so this is the only way to route a non-default input.
+	 */
+	if (!device_property_read_u32(&client->dev, "default-input", &val)) {
+		if (val > 31 || !(BIT(val) & state->chip_info->valid_input_mask))
+			v4l_warn(client, "invalid default-input %u, using 0\n", val);
+		else
+			state->input = val;
+	}
 	sd = &state->sd;
 	v4l2_i2c_subdev_init(sd, client, &adv7180_ops);
 	sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE | V4L2_SUBDEV_FL_HAS_EVENTS;
